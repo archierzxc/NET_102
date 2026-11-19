@@ -1,4 +1,6 @@
 
+import os
+
 from flask import Flask, render_template, request
 from netmiko import ConnectHandler
 
@@ -10,16 +12,26 @@ def index():
     error = None
 
     if request.method == "POST":
-        router_device = {
-            'device_type': 'cisco_ios_telnet',
-            'ip': '192.168.10.119',
-            'port': 32770,
-            'username': 'admin',
-            'password': 'eve123',
-            'secret': 'eve123',
-            'fast_cli': False,
-            'global_delay_factor': 2,
-        }
+        required_settings = (
+            "ROUTER_IP",
+            "ROUTER_USERNAME",
+            "ROUTER_PASSWORD",
+            "ROUTER_ENABLE_SECRET",
+        )
+        missing_settings = [
+            setting for setting in required_settings if not os.environ.get(setting)
+        ]
+
+        if missing_settings:
+            error = (
+                "Missing required environment variables: "
+                + ", ".join(missing_settings)
+            )
+            return render_template(
+                "index.html",
+                results=results,
+                error=error
+            )
 
         commands_to_run = [
             "show version",
@@ -30,6 +42,17 @@ def index():
         net_connect = None
 
         try:
+            router_device = {
+    'device_type': 'cisco_ios_telnet',
+    'ip': os.environ.get("ROUTER_IP", "192.168.10.119"),
+    'port': int(os.environ.get("ROUTER_PORT", "32770")),
+    'username': os.environ["ROUTER_USERNAME"],
+    'password': os.environ["ROUTER_PASSWORD"],
+    'secret': os.environ["ROUTER_ENABLE_SECRET"],
+    'fast_cli': False,
+    'global_delay_factor': 2,
+}
+    
             net_connect = ConnectHandler(**router_device)
 
             net_connect.enable()

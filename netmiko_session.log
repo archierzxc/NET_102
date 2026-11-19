@@ -1,0 +1,13 @@
+device = {
+    "device_type": "cisco_ios_telnet",
+    "host": "192.168.10.119",
+    "username": "admin",
+    "password": "eve123",
+    "secret": "eve123",
+    "global_delay_factor": 2,
+    "conn_timeout": 60,
+    "auth_timeout": 60,
+    "banner_timeout": 60,
+    "fast_cli": False,
+    "session_log": "netmiko_session.log",
+}

@@ -1,13 +1,29 @@
+import os
+
 from netmiko import ConnectHandler
 
 
+required_settings = (
+    "ROUTER_IP",
+    "ROUTER_USERNAME",
+    "ROUTER_PASSWORD",
+    "ROUTER_ENABLE_SECRET",
+)
+missing_settings = [
+    setting for setting in required_settings if not os.environ.get(setting)
+]
+if missing_settings:
+    raise RuntimeError(
+        "Missing required environment variables: " + ", ".join(missing_settings)
+    )
+
 router_device = {
     'device_type' : 'cisco_ios_telnet',
-    'ip': '192.168.10.102',
-    'port': 32770,
-    'username': 'admin',
-    'password': 'eve123',
-    'secret': 'eve123',
+    'ip': os.environ["ROUTER_IP"],
+    'port': int(os.environ.get("ROUTER_PORT", "32770")),
+    'username': os.environ["ROUTER_USERNAME"],
+    'password': os.environ["ROUTER_PASSWORD"],
+    'secret': os.environ["ROUTER_ENABLE_SECRET"],
 }
 try:
     print("Connecting to router...")
